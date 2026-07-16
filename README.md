@@ -95,5 +95,111 @@ Compile the files using a C++ compiler with C++17 support:
 ```Bash
 g++ -std=c++17 -Iinclude src/*.cpp -lglfw -lglad -lfreetype -o MythrilUIApp
 ```
+
+### 🛠️ Quick Start (Usage Example)
+
+MythrilUI is designed to be incredibly simple to instantiate. Once you have your standard GLFW window set up, creating and rendering UI elements takes only a few lines of code:
+
+```cpp
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <MythrilUI.hpp>
+#include <Mythril_TEXT.hpp>
+
+int main() {
+    // 1. Standard GLFW & GLAD Initialization
+    glfwInit();
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "MythrilUI Example", NULL, NULL);
+    glfwMakeContextCurrent(window);
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+    // 2. Initialize the MythrilUI Main Frame
+    MythrilUI mainFrame(window);
+
+    // 3. Create UI Widgets (Automatically bound to mainFrame)
+    // Parameters: parent, text, X, Y, scale, RGB color
+    Text greetingText(&mainFrame, "Hello, MythrilUI!", 0, 0, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // 4. Main Render Loop
+    while(!glfwWindowShouldClose(window)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Update widget properties dynamically if needed
+        // greetingText.UpdateText("New Text!");
+
+        // Render the entire UI tree in a single call
+        mainFrame.RenderUI();
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    
+    glfwTerminate();
+    return 0;
+}
+```
+## 📚 API Reference (Function Guide)
+
+MythrilUI is designed with an intuitive, object-oriented API. Below is a quick reference guide for the core classes and their available public methods.
+
+### 🖥️ MythrilUI (Main Core)
+The engine manager that handles the render queue, input polling, and shader states.
+* **`MythrilUI(GLFWwindow* Window)`** Initializes the UI manager and binds it to the active GLFW window.
+* **`void RenderUI()`** The core loop function. Processes mouse/keyboard inputs, calculates aspect-ratio matrices, and draws all widgets. Must be placed inside your main render loop.
+
+---
+
+### 🖼️ Image
+A modular widget for rendering static 2D textures. Supports multiple overloaded constructors for different `glm::vec2` or primitive float coordinates.
+* **Constructor:** `Image(MythrilUI* UI, float width, float height, float x, float y, const char* ImagePath)`
+* **`void UpdateSize(float x, float y)` / `UpdateSize(glm::vec2 size)`**
+  Dynamically recalculates the quad vertices to resize the image without breaking the aspect ratio.
+* **`void UpdatePosition(float x, float y)` / `UpdatePosition(glm::vec2 pos)`**
+  Moves the image to a new layout coordinate.
+* **`void UpdateTexture(const char* ImagePath)`**
+  Changes the displayed texture. Includes a smart garbage collector that frees the old texture from VRAM if no other widget is using it.
+* **`void enable(bool value)`**
+  Toggles the visibility of the image (true = visible, false = hidden).
+* **`void Delete()`**
+  Safely removes the image from the render queue and frees associated memory.
+
+---
+
+### 🔤 Text
+A modular widget that renders FreeType characters dynamically.
+* **Constructor:** `Text(MythrilUI* UI, std::string text, float x, float y, float scale, glm::vec3 color)`
+* **`void UpdateText(std::string text)`**
+  Changes the current string displayed on the screen.
+* **`void ChangeFont(std::string fontPath)`**
+  Switches the font face. Automatically manages FreeType face caches to prevent memory leaks.
+* **`void UpdateScale(float scale)`**
+  Adjusts the size multiplier of the font.
+* **`void UpdatePosition(float x, float y)` / `UpdatePosition(glm::vec2 pos)`**
+  Updates the baseline layout position.
+* **`void enable(bool value)`**
+  Toggles text visibility.
+* **`void Delete()`**
+  Removes the text from the render queue and cleans up resources.
+
+---
+
+### 🔘 Button (Interactive)
+A stateful widget that utilizes a 9-slice algorithm to prevent texture distortion on resize. Handles its own hover and click states.
+* **Constructor:** `Button(MythrilUI* UI, glm::vec2 size, glm::vec2 pos, const char* skinPath, const char* hoverSkinPath, std::string text, float scale, glm::vec3 textColor)`
+* **`void OnClicked(void(*func)())`**
+  Binds a function pointer (callback). The bound function will trigger automatically when the user clicks the button.
+  *Example:* `myButton.OnClicked(myCustomFunction);`
+* **`bool isClicked()`**
+  Returns `true` if the button was clicked during the current frame. Useful if you prefer polling over callbacks.
+
+---
+
+### ⌨️ TextBox (Interactive)
+An interactive input field with I-beam cursor rendering, keyboard polling, and text constraint margins.
+* **Constructor:** `TextBox(MythrilUI* UI, glm::vec2 size, glm::vec2 pos, float scale, glm::vec3 textColor, std::string defaultText)`
+* **`std::string getText()`**
+  Retrieves the real-time string value currently written inside the input box by the user.
+
 ## 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
