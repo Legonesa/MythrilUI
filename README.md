@@ -83,11 +83,11 @@ if (getTextWidth(tmpword, scale) < maxX) {
 ### Prerequisites
 Make sure you have the following libraries installed on your system:
 
- -GLFW & GLAD (OpenGL 3.3 Core Profile)
+ - GLFW & GLAD (OpenGL 3.3 Core Profile)
 
- -GLM (OpenGL Mathematics)
+ - GLM (OpenGL Mathematics)
 
- -FreeType (Font engine)
+ - FreeType (Font engine)
 
 ### Compilation
 Compile the files using a C++ compiler with C++17 support:
